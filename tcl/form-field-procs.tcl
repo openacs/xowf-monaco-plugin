@@ -39,6 +39,7 @@ namespace eval ::xowiki::formfield {
         .appendTo("head");
       }
       ::xo::Page requireCSS "/resources/xowf-monaco-plugin/plugin.css"
+      ::xo::Page requireJS "/resources/xowf-monaco-plugin/plugin.js"
       
       append :style "width: ${:width};" "height: ${:height};"
       set :__initialized 1
@@ -66,7 +67,7 @@ namespace eval ::xowiki::formfield {
     set readOnly [:is_disabled]
     
     ::html::div [:get_attributes id style {CSSclass class}] {}
-    ::html::input -type hidden -name ${:name} -id ${:id}.hidden
+    
     # TODO: URNs
     template::add_body_script -script {var require = { paths: { 'vs': '/resources/xowf-monaco-plugin/monaco-editor/min/vs' } };}
     template::add_body_script -src  "/resources/xowf-monaco-plugin/monaco-editor/min/vs/loader.js"
@@ -77,25 +78,33 @@ namespace eval ::xowiki::formfield {
     set currentValue [:value]
     # ns_log notice currentValue=>[:fromBase64 $currentValue]
     template::add_body_script -script [subst -nocommands {
-      function utf8_to_b64(str) {
-        return window.btoa(unescape(encodeURIComponent(str)));
-      }
-
-      function b64_to_utf8(str) {
-        return decodeURIComponent(escape(window.atob(str)));
-      }
       
-      var editor = monaco.editor.create(document.getElementById('${:id}'), {
+      xowf.monaco.editors.push(monaco.editor.create(document.getElementById('${:id}'), {
         language: '${:language}', minimap: {enabled: ${:minimap}}, readOnly: $readOnly, theme: '${:theme}'
-      });
-      editor.setValue(b64_to_utf8('$currentValue'));
-      \$(document).ready(function(){
-        \$("form").submit(function(event){
-          // alert(utf8_to_b64(editor.getValue()));
-          document.getElementById('${:id}.hidden').value = utf8_to_b64(editor.getValue());
-        });
-      });
+      }));
+      xowf.monaco.editors[xowf.monaco.editors.length-1].setValue(xowf.monaco.b64_to_utf8('$currentValue'));
     }]
+
+
+    if {!$readOnly} {
+      ::html::input -type hidden -name ${:name} -id ${:id}.hidden
+      template::add_body_script -script {
+        $(document).ready(function(){
+          $("form").submit(function(event) {
+            for (var i = 0; i < xowf.monaco.editors.length ; i++)  {
+               var e = xowf.monaco.editors[i];
+               if (!e.getRawOptions()["readOnly"]) {
+                 var hiddenId = e.getDomNode().parentNode.id + ".hidden";
+                 var hiddenEl = document.getElementById(hiddenId);
+                 if (hiddenEl != null) {
+                   hiddenEl.value = xowf.monaco.utf8_to_b64(e.getValue());
+                 }
+              }                             
+            }
+          });
+      });
+      }
+    }
   }
 
   monaco instproc set_feedback {feedback_mode} {
