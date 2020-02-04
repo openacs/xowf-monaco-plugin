@@ -53,7 +53,7 @@ namespace eval ::xowiki::formfield {
     }
   }
 
-  monaco instproc pretty_value {} {
+  monaco instproc pretty_value {v} {
     return [:fromBase64 [:value]]
   }
 
