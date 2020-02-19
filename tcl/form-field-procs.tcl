@@ -22,6 +22,7 @@ namespace eval ::xowiki::formfield {
     {height 600px}
     {minimap true}
     {CSSclass xowf-monaco-container}
+    {readOnly false}
   }
 
   # TODO: Provide for switching between debug (dev) and production (min) mode
@@ -46,7 +47,6 @@ namespace eval ::xowiki::formfield {
       #::xo::Page requireJS "/resources/xowf-monaco-plugin/plugin.js"
       ::xo::Page requireJS  urn:ad:js:monaco:plugin
       
-      append :style "width: ${:width};" "height: ${:height};"
       set :__initialized 1
     }
   }
@@ -66,11 +66,14 @@ namespace eval ::xowiki::formfield {
     # TODO: Find the appropriate CSP escapes for monaco
     security::csp::require script-src 'unsafe-inline'
     
-    # TODO: In disabled mode, one could also use
-    # monaco.editor.colorizeElement on a pre element holding the code
-    # value
-    set readOnly [:is_disabled]
-    
+    set isDisabled [:is_disabled]
+
+    if {!$isDisabled} {
+      append :style "width: ${:width};" "height: ${:height};"
+    } else {
+      lappend :CSSclass "disabled"
+    }
+
     ::html::div [:get_attributes id style {CSSclass class}] {}
     
     template::add_body_script -script {var require = { paths: { 'vs': '/resources/xowf-monaco-plugin/monaco-editor/min/vs' } };}
@@ -81,22 +84,23 @@ namespace eval ::xowiki::formfield {
     # TODO: Use ids accepted by JQuery
     # regsub -all {[.:]} ${:id} "" id
     set currentValue [:value]
-    # ns_log notice currentValue=>[:fromBase64 $currentValue]
-    template::add_body_script -script [subst -nocommands {
+
+    if {!$isDisabled} {
+      template::add_body_script -script [subst -nocommands {
       
-      xowf.monaco.editors.push(monaco.editor.create(document.getElementById('${:id}'), {
-        language: '${:language}', minimap: {enabled: ${:minimap}}, readOnly: $readOnly, theme: '${:theme}'
+        xowf.monaco.editors.push(monaco.editor.create(document.getElementById('${:id}'), {
+          language: '${:language}', minimap: {enabled: ${:minimap}}, readOnly: ${:readOnly}, theme: '${:theme}'
       }));
-      xowf.monaco.editors[xowf.monaco.editors.length-1].setValue(xowf.monaco.b64_to_utf8('$currentValue'));
-    }]
+        xowf.monaco.editors[xowf.monaco.editors.length-1].setValue(xowf.monaco.b64_to_utf8('$currentValue'));
+        
+      }]
 
-
-    if {!$readOnly} {
-      ::html::input -type hidden -name ${:name} -id ${:id}.hidden
-      template::add_body_script -script {
-        $(document).ready(function(){
-          $("form").submit(function(event) {
-            for (var i = 0; i < xowf.monaco.editors.length ; i++)  {
+      if {!${:readOnly}} {
+        ::html::input -type hidden -name ${:name} -id ${:id}.hidden
+        template::add_body_script -script {
+          $(document).ready(function(){
+            $("form").submit(function(event) {
+              for (var i = 0; i < xowf.monaco.editors.length ; i++)  {
                var e = xowf.monaco.editors[i];
                if (!e.getRawOptions()["readOnly"]) {
                  var hiddenId = e.getDomNode().parentNode.id + ".hidden";
@@ -104,11 +108,17 @@ namespace eval ::xowiki::formfield {
                  if (hiddenEl != null) {
                    hiddenEl.value = xowf.monaco.utf8_to_b64(e.getValue());
                  }
-              }                             
-            }
+               }                             
+             }
+            });
           });
-      });
+        }
       }
+    } else {
+      template::add_body_script -script [subst {
+        monaco.editor.colorize(xowf.monaco.b64_to_utf8('$currentValue'), '${:language}')
+        .then(html => document.getElementById('${:id}').innerHTML = html);
+      }]
     }
   }
 
