@@ -30,16 +30,21 @@ namespace eval ::xowiki::formfield {
       # TODO: Provide for setting data attributes (data-name) on link
       # tags via template::head::add_link
       ::xo::Page requireJS urn:ad:js:jquery
+
+      # TODO: Switch to URN, once template::head::add_link (see above) is supported
       ::xo::Page requireJS {
         $("<link/>", {
           rel: "stylesheet",
           type: "text/css"
         }).attr("data-name", "vs/editor/editor.main")
-        .attr("href","/resources/xowf-monaco-plugin/monaco-editor/dev/vs/editor/editor.main.css")
+        .attr("href","/resources/xowf-monaco-plugin/monaco-editor/min/vs/editor/editor.main.css")
         .appendTo("head");
       }
-      ::xo::Page requireCSS "/resources/xowf-monaco-plugin/plugin.css"
-      ::xo::Page requireJS "/resources/xowf-monaco-plugin/plugin.js"
+
+      #::xo::Page requireCSS "/resources/xowf-monaco-plugin/plugin.css"
+      ::xo::Page requireCSS urn:ad:css:monaco:plugin
+      #::xo::Page requireJS "/resources/xowf-monaco-plugin/plugin.js"
+      ::xo::Page requireJS  urn:ad:js:monaco:plugin
       
       append :style "width: ${:width};" "height: ${:height};"
       set :__initialized 1
@@ -68,11 +73,11 @@ namespace eval ::xowiki::formfield {
     
     ::html::div [:get_attributes id style {CSSclass class}] {}
     
-    # TODO: URNs
     template::add_body_script -script {var require = { paths: { 'vs': '/resources/xowf-monaco-plugin/monaco-editor/min/vs' } };}
-    template::add_body_script -src  "/resources/xowf-monaco-plugin/monaco-editor/min/vs/loader.js"
-    template::add_body_script -src  "/resources/xowf-monaco-plugin/monaco-editor/min/vs/editor/editor.main.nls.js"
-    template::add_body_script -src  "/resources/xowf-monaco-plugin/monaco-editor/min/vs/editor/editor.main.js"
+    template::add_body_script -src urn:ad:js:monaco:min/vs/loader
+    template::add_body_script -src urn:ad:js:monaco:min/vs/editor/editor.main.nls
+    template::add_body_script -src urn:ad:js:monaco:min/vs/editor/editor.main
+
     # TODO: Use ids accepted by JQuery
     # regsub -all {[.:]} ${:id} "" id
     set currentValue [:value]
