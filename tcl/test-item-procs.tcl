@@ -102,7 +102,7 @@ namespace eval ::xowf::monaco {
           error "invalid grading '$grading'; valid are 'exact' or 'partial'"
         }
         set options "{exact exact} {partial partial}"
-        set gradingSpec [subst {grading {select,options=$options,default=${:grading},label=#xowf.Grading-Schema#}}]
+        set gradingSpec [subst {grading {select,options=$options,default=${:grading},label=#xowf.Grading-Scheme#}}]
       } else {
         set gradingSpec ""
       }
