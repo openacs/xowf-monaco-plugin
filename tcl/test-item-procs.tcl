@@ -4,7 +4,8 @@
   @author Stefan Sobernig
 }
 
-:::xo::db::require package xowf
+::xo::db::require package xowf
+::xo::library require -package xowf test-item-procs
 
 namespace eval ::xowiki::formfield {
   ###########################################################
@@ -131,6 +132,8 @@ namespace eval ::xowf::monaco {
  
   ::xowiki::formfield::test_item instmixin add test_item
 }
+
+::xo::library source_dependent
 #
 # Local variables:
 #    mode: tcl
