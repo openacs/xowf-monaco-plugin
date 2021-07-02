@@ -46,7 +46,7 @@ namespace eval ::xowiki::formfield {
       ::xo::Page requireCSS urn:ad:css:monaco:plugin
       #::xo::Page requireJS "/resources/xowf-monaco-plugin/plugin.js"
       ::xo::Page requireJS  urn:ad:js:monaco:plugin
-      
+
       set :__initialized 1
     }
   }
@@ -65,7 +65,7 @@ namespace eval ::xowiki::formfield {
   monaco instproc render_input {} {
     # TODO: Find the appropriate CSP escapes for monaco
     security::csp::require script-src 'unsafe-inline'
-    
+
     set isDisabled [:is_disabled]
 
     if {!$isDisabled} {
@@ -75,7 +75,7 @@ namespace eval ::xowiki::formfield {
     }
 
     ::html::div [:get_attributes id style {CSSclass class}] {}
-    
+
     template::add_body_script -script {var require = { paths: { 'vs': '/resources/xowf-monaco-plugin/monaco-editor/min/vs' } };}
     template::add_body_script -src urn:ad:js:monaco:min/vs/loader
     template::add_body_script -src urn:ad:js:monaco:min/vs/editor/editor.main.nls
@@ -87,12 +87,12 @@ namespace eval ::xowiki::formfield {
 
     if {!$isDisabled} {
       template::add_body_script -script [subst -nocommands {
-      
+
         xowf.monaco.editors.push(monaco.editor.create(document.getElementById('${:id}'), {
           language: '${:language}', minimap: {enabled: ${:minimap}}, readOnly: ${:readOnly}, theme: '${:theme}'
       }));
         xowf.monaco.editors[xowf.monaco.editors.length-1].setValue(xowf.monaco.b64_to_utf8('$currentValue'));
-        
+
       }]
 
       if {!${:readOnly}} {
@@ -108,7 +108,7 @@ namespace eval ::xowiki::formfield {
                  if (hiddenEl != null) {
                    hiddenEl.value = xowf.monaco.utf8_to_b64(e.getValue());
                  }
-               }                             
+               }
              }
             });
           });
