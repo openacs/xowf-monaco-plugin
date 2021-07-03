@@ -126,6 +126,90 @@ namespace eval ::xowiki::formfield {
     next
   }
 
+  ########################################################s###
+  #
+  # ::xowiki::formfield::html_sandbox
+  #
+  ###########################################################
+
+  Class create html_sandbox -superclass monaco -ad_doc {
+    This class provides a HTML sandbox formfield powered by the Monaco
+    code editor set to HTML mode. The code inputed in the editor is
+    rendered as a standalone document inside an iframe.
+
+    The formfield also supports live preview, updated whenever the
+    code has changed.
+  } -parameter {
+    {preview true}
+  }
+
+  html_sandbox instproc initialize args {
+    set :language html
+    next
+  }
+
+  html_sandbox ad_instproc render_input args {
+    Displays the editor. If user selected to have the preview, will
+    put editor and preview side by side using flexbox responsive
+    layout. The preview will update automatically whenever the code
+    changes.
+  } {
+    # No preview, just show the editor
+    if {!${:preview}} {
+      return [next]
+    }
+
+    ::html::div -id ${:id}-container style "display:flex; flex-wrap:wrap;" {
+      ::html::div -id ${:id}-code {
+        next
+      }
+      ::html::div -id ${:id}-preview {
+        ::html::iframe -id ${:id}-iframe -style "width: ${:width}; height: ${:height};"
+      }
+    }
+
+    # Find our Monaco editor instance, get its value and inject it
+    # into the preview iframe. Listen also to any change and update
+    # the preview on the fly.
+    template::add_body_handler -event load -script [subst -nocommands {
+      var iframe = document.getElementById('${:id}-iframe');
+      for (var i = 0; i < xowf.monaco.editors.length ; i++)  {
+        var e = xowf.monaco.editors[i];
+        if (!e.getRawOptions()["readOnly"]) {
+          var hiddenId = e.getDomNode().parentNode.id + ".hidden";
+          if (hiddenId === '${:id}.hidden') {
+            // This is our editor, set its value in the iframe
+            iframe.srcdoc = e.getValue();
+            // Listen to changes and update the iframe
+            e.onDidChangeModelContent((event) => {
+              iframe.srcdoc = e.getValue();
+            });
+          }
+        }
+      }
+    }]
+  }
+
+  html_sandbox ad_instproc pretty_value args {
+    Put the code (base64 encoded) in an invisible template element and
+    add an iframe. When the page loads, translate and put the code
+    inside the template element as the document of the iframe, so that
+    it is rendered.
+
+    @return HTML
+  } {
+    template::add_body_handler -event load -script [subst -nocommands {
+      var srcDoc = document.getElementById('${:id}-srcdoc');
+      var iframe = document.getElementById('${:id}-iframe');
+      iframe.srcdoc = xowf.monaco.b64_to_utf8(srcDoc.innerHTML);
+    }]
+    set base64 [:value]
+    return [subst -nocommands {
+      <template id="${:id}-srcdoc" style="display:none;">$base64</template>
+      <iframe style="width: ${:width}; height: ${:height};" id="${:id}-iframe"></iframe>
+    }]
+  }
+
 }
 
 # Local variables:
