@@ -128,85 +128,144 @@ namespace eval ::xowiki::formfield {
 
   ########################################################s###
   #
-  # ::xowiki::formfield::html_sandbox
+  # ::xowiki::formfield::monaco_html_sandbox
   #
   ###########################################################
 
-  Class create html_sandbox -superclass monaco -ad_doc {
+  Class create monaco_html_sandbox -superclass monaco -ad_doc {
     This class provides a HTML sandbox formfield powered by the Monaco
     code editor set to HTML mode. The code inputed in the editor is
-    rendered as a standalone document inside an iframe.
+    rendered as a standalone document inside an iframe, or in a
+    separate window.
 
     The formfield also supports live preview, updated whenever the
-    code has changed.
+    code has changed. The preview can be shown alongside the code
+    (inline), in a separate window, or both.
   } -parameter {
-    {preview true}
+    {preview_window true}
+    {preview_inline true}
   }
 
-  html_sandbox instproc initialize args {
+  monaco_html_sandbox instproc initialize args {
     set :language html
     next
   }
 
-  html_sandbox ad_instproc render_input args {
-    Displays the editor. If user selected to have the preview, will
-    put editor and preview side by side using flexbox responsive
-    layout. The preview will update automatically whenever the code
-    changes.
+  monaco_html_sandbox ad_instproc render_input args {
+    Displays the editor. It will also render the preview according to
+    parameters and make sure that this is kept up to date whenever the
+    code in the editor changes.
   } {
-    # No preview, just show the editor
-    if {!${:preview}} {
+    # No previews, just show the code editor
+    if {!${:preview_inline} && !${:preview_window}} {
       return [next]
+    }
+
+    # This element is invisible and contains the base64 encoded value
+    # of the formfield, which we use to initialize the previews. One
+    # could also do it using the editor api, but we do not have one in
+    # case of a readonly field or when we render this field in display
+    # mode.
+    ::html::template -id "${:id}-srcdoc" style "display:none;" {
+      ::html::t [:value]
     }
 
     ::html::div -id ${:id}-container style "display:flex; flex-wrap:wrap;" {
       ::html::div -id ${:id}-code {
         next
       }
-      ::html::div -id ${:id}-preview {
-        ::html::iframe -id ${:id}-iframe -style "width: ${:width}; height: ${:height};"
+      if {${:preview_inline}} {
+        ::html::div -id ${:id}-preview {
+          ::html::iframe -id ${:id}-iframe -style "width: ${:width}; height: ${:height};"
+        }
+      }
+    }
+    if {${:preview_window}} {
+      ::html::div {
+        ::html::a -href "#" -id ${:id}-fullscreen-btn class "btn btn-default" {
+          html::t [_ xowf-monaco-plugin.open_preview_in_an_own_window]
+        }
       }
     }
 
-    # Find our Monaco editor instance, get its value and inject it
-    # into the preview iframe. Listen also to any change and update
-    # the preview on the fly.
     template::add_body_handler -event load -script [subst -nocommands {
+      var srcDoc = document.getElementById('${:id}-srcdoc');
+      var page = xowf.monaco.b64_to_utf8(srcDoc.innerHTML);
+
+      // When clicking on the fullscreen button, open a new window and
+      // copy the current code inside of its document
+      var fullscreenWindowHandle;
+      var fullscreenBtn = document.getElementById('${:id}-fullscreen-btn');
+      if (fullscreenBtn) {
+        fullscreenBtn.addEventListener("click", function(e) {
+          if ((!fullscreenWindowHandle || fullscreenWindowHandle.closed) && page) {
+            fullscreenWindowHandle = window.open();
+            fullscreenWindowHandle.document.write(page);
+          }
+        });
+      }
+
       var iframe = document.getElementById('${:id}-iframe');
+      if (iframe) {
+        iframe.srcdoc = page;
+      }
+
+      // If we have an editor (field is writable), find it and listen
+      // to change events, everytime updating the preview either inline
+      // or in the window.
       for (var i = 0; i < xowf.monaco.editors.length ; i++)  {
         var e = xowf.monaco.editors[i];
-        if (!e.getRawOptions()["readOnly"]) {
-          var hiddenId = e.getDomNode().parentNode.id + ".hidden";
-          if (hiddenId === '${:id}.hidden') {
-            // This is our editor, set its value in the iframe
-            iframe.srcdoc = e.getValue();
-            // Listen to changes and update the iframe
-            e.onDidChangeModelContent((event) => {
-              iframe.srcdoc = e.getValue();
-            });
-          }
+        var hiddenId = e.getDomNode().parentNode.id + ".hidden";
+        if (hiddenId === '${:id}.hidden') {
+          e.onDidChangeModelContent((event) => {
+            page = e.getValue();
+            if (iframe) {
+              iframe.srcdoc = page;
+            }
+            if (fullscreenWindowHandle && !fullscreenWindowHandle.closed) {
+              fullscreenWindowHandle.document.open();
+              fullscreenWindowHandle.document.write(page);
+              fullscreenWindowHandle.document.close();
+            }
+          });
         }
       }
     }]
   }
 
-  html_sandbox ad_instproc pretty_value args {
-    Put the code (base64 encoded) in an invisible template element and
-    add an iframe. When the page loads, translate and put the code
-    inside the template element as the document of the iframe, so that
-    it is rendered.
+  monaco_html_sandbox ad_instproc pretty_value args {
+    Display the HTML inline or as an own page by clicking a button.
 
     @return HTML
   } {
     template::add_body_handler -event load -script [subst -nocommands {
       var srcDoc = document.getElementById('${:id}-srcdoc');
+      var page = xowf.monaco.b64_to_utf8(srcDoc.innerHTML);
+
       var iframe = document.getElementById('${:id}-iframe');
-      iframe.srcdoc = xowf.monaco.b64_to_utf8(srcDoc.innerHTML);
+      iframe.srcdoc = page;
+
+      var fullscreenWindowHandle;
+      var fullscreenBtn = document.getElementById('${:id}-fullscreen-btn');
+      fullscreenBtn.addEventListener("click", function(e) {
+        e.preventDefault();
+        if (!fullscreenWindowHandle || fullscreenWindowHandle.closed) {
+          fullscreenWindowHandle = window.open();
+          fullscreenWindowHandle.document.write(page);
+        }
+      });
     }]
     set base64 [:value]
     return [subst -nocommands {
       <template id="${:id}-srcdoc" style="display:none;">$base64</template>
-      <iframe style="width: ${:width}; height: ${:height};" id="${:id}-iframe"></iframe>
+      <div>
+         <iframe style="width: ${:width}; height: ${:height};" id="${:id}-iframe"></iframe>
+      </div>
+      <div>
+         <a class="btn btn-default"
+            href="#"
+            id="${:id}-fullscreen-btn">#xowf-monaco-plugin.open_preview_in_an_own_window#</a>
+      </div>
     }]
   }
 

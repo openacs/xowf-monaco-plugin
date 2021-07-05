@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 <message_catalog package_key="xowf-monaco-plugin" locale="en_US" charset="ISO-8859-1">
 
+  <msg key="open_preview_in_an_own_window">Open preview in an own window</msg>
   <msg key="xowf.code_question">Programming task</msg>
 </message_catalog>
