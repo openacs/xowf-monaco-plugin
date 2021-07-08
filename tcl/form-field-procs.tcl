@@ -201,7 +201,7 @@ namespace eval ::xowiki::formfield {
         fullscreenBtn.addEventListener("click", function(e) {
           if ((!fullscreenWindowHandle || fullscreenWindowHandle.closed) && page) {
             fullscreenWindowHandle = window.open();
-            fullscreenWindowHandle.document.write('<iframe src="" style="width: 100%; height: 100%; border: 0;"></iframe>');
+            fullscreenWindowHandle.document.write('<iframe src="" style="width: 100%; height: 100%; border: 0;" allowfullscreen></iframe>');
             fullscreenIframe = fullscreenWindowHandle.document.querySelector('iframe');
             fullscreenIframe.srcdoc = page;
           }
