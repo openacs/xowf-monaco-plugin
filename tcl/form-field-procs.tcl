@@ -192,15 +192,18 @@ namespace eval ::xowiki::formfield {
       var srcDoc = document.getElementById('${:id}-srcdoc');
       var page = xowf.monaco.b64_to_utf8(srcDoc.innerHTML);
 
-      // When clicking on the fullscreen button, open a new window and
-      // copy the current code inside of its document
+      // When clicking on the fullscreen button, open a new window
+      // insert an iframe and set its content as our markup
       var fullscreenWindowHandle;
+      var fullscreenIframe;
       var fullscreenBtn = document.getElementById('${:id}-fullscreen-btn');
       if (fullscreenBtn) {
         fullscreenBtn.addEventListener("click", function(e) {
           if ((!fullscreenWindowHandle || fullscreenWindowHandle.closed) && page) {
             fullscreenWindowHandle = window.open();
-            fullscreenWindowHandle.document.write(page);
+            fullscreenWindowHandle.document.write('<iframe src="" style="width: 100%; height: 100%; border: 0;"></iframe>');
+            fullscreenIframe = fullscreenWindowHandle.document.querySelector('iframe');
+            fullscreenIframe.srcdoc = page;
           }
         });
       }
@@ -223,9 +226,7 @@ namespace eval ::xowiki::formfield {
               iframe.srcdoc = page;
             }
             if (fullscreenWindowHandle && !fullscreenWindowHandle.closed) {
-              fullscreenWindowHandle.document.open();
-              fullscreenWindowHandle.document.write(page);
-              fullscreenWindowHandle.document.close();
+              fullscreenIframe.srcdoc = page;
             }
           });
         }
