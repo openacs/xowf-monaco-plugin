@@ -2,4 +2,5 @@
 <message_catalog package_key="xowf-monaco-plugin" locale="es_ES" charset="ISO-8859-1">
 
   <msg key="xowf.code_question">Ejercicio de programación</msg>
+  <msg key="open_preview_in_an_own_window">Abrir vista previa en una ventana propia</msg>
 </message_catalog>
