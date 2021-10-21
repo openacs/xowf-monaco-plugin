@@ -151,7 +151,7 @@ namespace eval ::xowiki::formfield {
     next
   }
 
-  monaco_html_sandbox ad_instproc render_input args {
+  monaco_html_sandbox ad_instproc -private render_input args {
     Displays the editor. It will also render the preview according to
     parameters and make sure that this is kept up to date whenever the
     code in the editor changes.
@@ -234,7 +234,7 @@ namespace eval ::xowiki::formfield {
     }]
   }
 
-  monaco_html_sandbox ad_instproc pretty_value args {
+  monaco_html_sandbox ad_instproc -private pretty_value args {
     Display the HTML inline or as an own page by clicking a button.
 
     @return HTML
