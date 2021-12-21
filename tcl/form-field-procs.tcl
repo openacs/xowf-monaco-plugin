@@ -4,7 +4,7 @@
   @author Stefan Sobernig
 }
 
-:::xo::db::require package xowiki
+::xo::db::require package xowiki
 
 
 namespace eval ::xowiki::formfield {
@@ -133,7 +133,7 @@ namespace eval ::xowiki::formfield {
   ###########################################################
 
   Class create monaco_html_sandbox -superclass monaco -ad_doc {
-    This class provides a HTML sandbox formfield powered by the Monaco
+    This class provides an HTML sandbox formfield powered by the Monaco
     code editor set to HTML mode. The code inputed in the editor is
     rendered as a standalone document inside an iframe, or in a
     separate window.
@@ -214,7 +214,7 @@ namespace eval ::xowiki::formfield {
       }
 
       // If we have an editor (field is writable), find it and listen
-      // to change events, everytime updating the preview either inline
+      // to change events, every time updating the preview either inline
       // or in the window.
       for (var i = 0; i < xowf.monaco.editors.length ; i++)  {
         var e = xowf.monaco.editors[i];
