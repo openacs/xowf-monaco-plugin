@@ -4,7 +4,6 @@
   @author Stefan Sobernig
 }
 
-::xo::db::require package xowf
 ::xo::library require -package xowf test-item-procs
 
 namespace eval ::xowiki::formfield {
