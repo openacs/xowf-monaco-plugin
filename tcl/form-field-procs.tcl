@@ -4,6 +4,7 @@
   @author Stefan Sobernig
 }
 
+::xo::library require -package xowiki form-field-procs
 
 namespace eval ::xowiki::formfield {
 
