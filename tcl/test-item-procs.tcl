@@ -121,7 +121,7 @@ namespace eval ::xowf::monaco {
         $gradingSpec
         $shuffleSpec
         {interaction {$interaction_class,$options,feedback_level=${:feedback_level},auto_correct=${:auto_correct},label=}}
-        [:feed_back_definition]
+        [:feedback_definition]
       }]
       set :__initialized 1
     } else {
