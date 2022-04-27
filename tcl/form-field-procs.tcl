@@ -75,10 +75,14 @@ namespace eval ::xowiki::formfield {
 
     ::html::div [:get_attributes id style {CSSclass class}] {}
 
-    template::add_body_script -script {var require = { paths: { 'vs': '/resources/xowf-monaco-plugin/monaco-editor/min/vs' } };}
-    template::add_body_script -src urn:ad:js:monaco:min/vs/loader
-    template::add_body_script -src urn:ad:js:monaco:min/vs/editor/editor.main.nls
-    template::add_body_script -src urn:ad:js:monaco:min/vs/editor/editor.main
+    # Make sure we load the Monaco js only once per request, in case
+    # multiple formfields are on the page.
+    acs::per_request_cache eval -key xowf-monaco-plugin.monaco-render_input {
+      template::add_body_script -script {var require = { paths: { 'vs': '/resources/xowf-monaco-plugin/monaco-editor/min/vs' } };}
+      template::add_body_script -src urn:ad:js:monaco:min/vs/loader
+      template::add_body_script -src urn:ad:js:monaco:min/vs/editor/editor.main.nls
+      template::add_body_script -src urn:ad:js:monaco:min/vs/editor/editor.main
+    }
 
     # TODO: Use ids accepted by JQuery
     # regsub -all {[.:]} ${:id} "" id
