@@ -137,7 +137,7 @@ namespace eval ::xowiki::formfield {
 
   Class create monaco_html_sandbox -superclass monaco -ad_doc {
     This class provides an HTML sandbox formfield powered by the Monaco
-    code editor set to HTML mode. The code inputed in the editor is
+    code editor set to HTML mode. The code inputted in the editor is
     rendered as a standalone document inside an iframe, or in a
     separate window.
 
