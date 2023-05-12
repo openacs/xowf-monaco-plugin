@@ -14,6 +14,7 @@ namespace eval ::xowiki::formfield {
   ###########################################################
 
   Class create code_interaction -superclass TestItemField
+  code_interaction set item_type Code
 
   code_interaction instproc initialize {} {
     if {${:__state} ne "after_specs"} return
