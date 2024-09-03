@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<message_catalog package_key="xowf-monaco-plugin" locale="it_IT" charset="ISO-8859-1">
+
+  <msg key="open_preview_in_an_own_window">Apri l&#39;anteprima in una propria finestra</msg>
+  <msg key="xowf.code_question">Attività di programmazione</msg>
+</message_catalog>

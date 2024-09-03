@@ -4,7 +4,7 @@
   @author Stefan Sobernig
 }
 
-:::xo::db::require package xowf
+::xo::library require -package xowf test-item-procs
 
 namespace eval ::xowiki::formfield {
   ###########################################################
@@ -14,6 +14,7 @@ namespace eval ::xowiki::formfield {
   ###########################################################
 
   Class create code_interaction -superclass TestItemField
+  code_interaction set item_type Code
 
   code_interaction instproc initialize {} {
     if {${:__state} ne "after_specs"} return
@@ -102,7 +103,7 @@ namespace eval ::xowf::monaco {
           error "invalid grading '$grading'; valid are 'exact' or 'partial'"
         }
         set options "{exact exact} {partial partial}"
-        set gradingSpec [subst {grading {select,options=$options,default=${:grading},label=#xowf.Grading-Schema#}}]
+        set gradingSpec [subst {grading {select,options=$options,default=${:grading},label=#xowf.Grading-Scheme#}}]
       } else {
         set gradingSpec ""
       }
@@ -121,7 +122,7 @@ namespace eval ::xowf::monaco {
         $gradingSpec
         $shuffleSpec
         {interaction {$interaction_class,$options,feedback_level=${:feedback_level},auto_correct=${:auto_correct},label=}}
-        [:feed_back_definition]
+        [:feedback_definition]
       }]
       set :__initialized 1
     } else {
@@ -131,6 +132,8 @@ namespace eval ::xowf::monaco {
  
   ::xowiki::formfield::test_item instmixin add test_item
 }
+
+::xo::library source_dependent
 #
 # Local variables:
 #    mode: tcl

@@ -8,13 +8,14 @@
     <singleton-p>t</singleton-p>
     <implements-subsite-p>f</implements-subsite-p>
     <inherit-templates-p>f</inherit-templates-p>
-    
-    <version name="0.19.3.1" url="http://openacs.org/repository/download/apm/xowf-monaco-plugin-1.9.3.1.apm">
+
+    <version name="0.20.2" url="http://openacs.org/repository/download/apm/xowf-monaco-plugin-0.20.2.apm">
         <owner url="mailto:stefan.sobernig@wu.ac.at">Stefan Sobernig</owner>
         <summary>Provides integration with the Monaco code editor for XoWiki and XoWiki Workflow.</summary>
         <maturity>0</maturity>
 
-        <provides url="xowf-monaco-plugin" version="0.19.3.1"/>
+        <provides url="xowf-monaco-plugin" version="0.20.2"/>
+        <requires url="xowf" version="5.10.1d32"/>
 
         <callbacks>
         </callbacks>
