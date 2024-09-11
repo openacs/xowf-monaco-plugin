@@ -24,12 +24,6 @@ namespace eval ::xowiki::formfield {
     {readOnly false}
   }
 
-  monaco instproc describe {{-field_name ""}} {
-    set d [next]
-    dict set d type Code
-    return $d
-  }
-
   # TODO: Provide for switching between debug (dev) and production (min) mode
   monaco instproc initialize {} {
     if {![info exists :__initialized]} {
